@@ -5,11 +5,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 
-
+// Controller untuk mengatur login, register, logout
 class AuthController extends Controller {
     public function showLogin() { return view('auth.login'); }
     public function showRegister() { return view('auth.register'); }
 
+    // Fitur untuk melakukan login
     public function authenticate(Request $request) {
         $credentials = $request->validate(['username' => 'required', 'password' => 'required']);
         if (Auth::attempt($credentials)) {
@@ -26,6 +27,7 @@ class AuthController extends Controller {
         return back()->with('error', 'Username atau password salah bro!');
     }
 
+    // Fitur untuk melakukan register
     public function register(Request $request) {
         $request->validate(['username' => 'required|unique:users', 'password' => 'required|min:5']);
         User::create([
@@ -33,7 +35,6 @@ class AuthController extends Controller {
             'password' => Hash::make($request->password),
             'role'     => 'customer'
         ]);
-        // Benerin ke URL /login
         return redirect('/login')->with('success', 'Akun berhasil dibuat! Silakan login.');
     }
 
@@ -41,8 +42,6 @@ class AuthController extends Controller {
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        // Benerin ke URL /login
         return redirect('/login');
     }
-    
 }

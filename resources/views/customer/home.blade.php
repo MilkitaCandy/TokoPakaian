@@ -10,6 +10,8 @@
     <style>
         body { font-family: 'Montserrat', sans-serif; }
         html { scroll-behavior: smooth; }
+        .transition { transition: all 0.3s ease; }
+        .text-opacity-100-hover:hover { opacity: 1 !important; }
     </style>
 </head>
 <body class="bg-light text-dark">
@@ -30,12 +32,25 @@
                 </ul>
                 
                 <div class="d-flex align-items-center gap-4 mt-3 mt-lg-0">
-                    <div class="text-white text-end lh-1 pe-3 border-end border-secondary">
+                    <div class="text-white text-end lh-1 pe-3 border-end border-secondary d-none d-md-block">
                         <span class="d-block small text-secondary mb-1">Welcome back,</span>
                         <span class="fw-bold text-uppercase">{{ auth()->user()->username }}</span>
                     </div>
-                    <a href="{{ url('/katalog') }}" class="text-white text-decoration-none opacity-75 text-opacity-100-hover"><i class="bi bi-bag fs-5"></i></a>
-                    <a href="{{ url('/logout') }}" class="text-white text-decoration-none opacity-75 text-opacity-100-hover"><i class="bi bi-box-arrow-right fs-5"></i></a>
+                    
+                    <!-- ICON RIWAYAT PESANAN (Kertas/Nota) -->
+                    <a href="{{ url('/riwayat') }}" class="text-white text-decoration-none fs-5 transition" title="Riwayat Pesanan">
+                        <i class="bi bi-receipt"></i>
+                    </a>
+                    
+                    <!-- ICON BAG -->
+                    <a href="#cartSidebar" data-bs-toggle="offcanvas" class="text-white text-decoration-none fs-5 transition" title="Keranjang Belanja">
+                        <i class="bi bi-bag"></i>
+                    </a>
+
+                    <!-- ICON LOGOUT (Pintu Keluar Merah) -->
+                    <a href="{{ url('/logout') }}" class="text-danger text-decoration-none fs-5 transition ms-2" title="Logout" onclick="return confirm('Yakin mau keluar dari OUT FIT bro?');">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </a>
                 </div>
             </div>
         </div>
@@ -69,7 +84,11 @@
                         
                         <img src="{{ asset('img/pakaian/' . $pakaian->gambar) }}" class="card-img-top object-fit-cover w-100" style="aspect-ratio: 3/4;" alt="{{ $pakaian->nama_pakaian }}">
                         
-                        <a href="{{ url('/katalog') }}" class="btn btn-light w-100 rounded-0 fw-bold text-uppercase position-absolute bottom-0 start-0 border-top">Shop Item</a>
+                        <form action="{{ url('/cart/add') }}" method="POST" class="m-0 p-0 position-absolute bottom-0 start-0 w-100">
+                            @csrf
+                            <input type="hidden" name="pakaian_id" value="{{ $pakaian->_id }}">
+                            <button type="submit" class="btn btn-light w-100 rounded-0 fw-bold text-uppercase border-top">Add to Bag</button>
+                        </form>
                     </div>
                     <div class="card-body px-0 pt-3 pb-0 text-start">
                         <p class="text-secondary small mb-1 text-uppercase fw-semibold">{{ $pakaian->merk }}</p>
@@ -146,19 +165,69 @@
         </div>
     </footer>
 
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="cartSidebar" aria-labelledby="cartSidebarLabel">
+        <div class="offcanvas-header border-bottom py-3">
+            <h5 class="offcanvas-title fw-bolder text-uppercase" id="cartSidebarLabel">Your Bag</h5>
+            <button type="button" class="btn-close shadow-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        
+        <div class="offcanvas-body d-flex flex-column p-0">
+            @php $total = 0; @endphp
+
+            @if(session('cart') && count(session('cart')) > 0)
+                <div class="flex-grow-1 overflow-auto">
+                    @foreach(session('cart') as $id => $details)
+                        @php $total += $details['harga'] * $details['quantity']; @endphp
+                        <div class="p-3 border-bottom d-flex gap-3 align-items-center">
+                            <img src="{{ asset('img/pakaian/' . $details['gambar']) }}" class="object-fit-cover" style="width: 80px; height: 100px;">
+                            
+                            <div class="flex-grow-1">
+                                <h6 class="fw-bold mb-1 text-truncate" style="font-size: 0.9rem; max-width: 150px;">{{ $details['nama_pakaian'] }}</h6>
+                                <p class="text-secondary small mb-2">Rp {{ number_format($details['harga'], 0, ',', '.') }}</p>
+                                
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span class="small fw-bolder">QTY: {{ $details['quantity'] }}</span>
+                                    
+                                    <form action="{{ url('/cart/remove') }}" method="POST" class="m-0 p-0">
+                                        @csrf
+                                        <input type="hidden" name="pakaian_id" value="{{ $id }}">
+                                        <button type="submit" class="btn btn-link text-danger p-0 shadow-none"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="text-center py-5 my-auto">
+                    <i class="bi bi-bag-x display-4 text-secondary opacity-50 mb-3 d-block"></i>
+                    <p class="text-secondary fw-bold text-uppercase">Bag is Empty</p>
+                    <button type="button" class="btn btn-outline-dark rounded-0 px-4 mt-2 fw-bold" data-bs-dismiss="offcanvas">CONTINUE SHOPPING</button>
+                </div>
+            @endif
+
+            <div class="mt-auto p-4 bg-light border-top">
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="fw-bold text-uppercase">Subtotal</span>
+                    <span class="fw-bolder fs-5">Rp {{ number_format($total, 0, ',', '.') }}</span>
+                </div>
+                <a href="{{ url('/checkout') }}" class="btn btn-dark w-100 rounded-0 py-3 fw-bold text-uppercase text-center text-decoration-none {{ (!session('cart') || count(session('cart')) == 0) ? 'disabled' : '' }}">Secure Checkout</a>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!--Start of Tawk.to Script-->
-<script type="text/javascript">
-var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-(function(){
-var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-s1.async=true;
-s1.src='https://embed.tawk.to/6a1ad55faeb8521c2817aeca/1jpsd2vqj';
-s1.charset='UTF-8';
-s1.setAttribute('crossorigin','*');
-s0.parentNode.insertBefore(s1,s0);
-})();
-</script>
-<!--End of Tawk.to Script-->
+    
+    <script type="text/javascript">
+    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+    (function(){
+    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+    s1.async=true;
+    s1.src='https://embed.tawk.to/6a1ad55faeb8521c2817aeca/1jpsd2vqj';
+    s1.charset='UTF-8';
+    s1.setAttribute('crossorigin','*');
+    s0.parentNode.insertBefore(s1,s0);
+    })();
+    </script>
 </body>
 </html>

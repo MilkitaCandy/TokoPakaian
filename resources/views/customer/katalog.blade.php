@@ -42,9 +42,16 @@
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom py-3">
         <div class="container">
             <a class="navbar-brand fw-black fs-4 tracking-widest" href="{{ url('/home') }}">OUT FIT.</a>
+            
             <div class="d-flex align-items-center gap-4">
-                <a href="{{ url('/home') }}" class="text-white text-decoration-none fw-bold small text-uppercase tracking-wider"><i class="bi bi-arrow-left me-2"></i> Back to Home</a>
+                <a href="{{ url('/home') }}" class="text-white text-decoration-none fw-bold small text-uppercase tracking-wider">
+                    <i class="bi bi-arrow-left me-2"></i> Back to Home
+                </a>
+                <a href="#cartSidebar" data-bs-toggle="offcanvas" class="text-white text-decoration-none fs-5 transition">
+                    <i class="bi bi-bag"></i>
+                </a>
             </div>
+
         </div>
     </nav>
 
@@ -105,7 +112,12 @@
                             <span class="position-absolute top-0 start-0 m-2 badge bg-dark text-white rounded-0 px-2 py-1 fw-bold z-2 shadow-sm" style="font-size: 0.7rem;">LAST CHANCE</span>
                         @endif
                         <img src="{{ asset('img/pakaian/' . $pakaian->gambar) }}" class="card-img-top object-fit-cover w-100" alt="{{ $pakaian->nama_pakaian }}">
-                        <button class="quick-add-btn">Add to Bag</button>
+                        
+                        <form action="{{ url('/cart/add') }}" method="POST" class="m-0 p-0">
+                            @csrf
+                            <input type="hidden" name="pakaian_id" value="{{ $pakaian->_id }}">
+                            <button type="submit" class="quick-add-btn">Add to Bag</button>
+                        </form>
                     </div>
                     <div class="card-body px-0 pt-3 pb-0 d-flex flex-column">
                         <p class="text-muted small tracking-widest text-uppercase fw-semibold m-0 text-start">{{ $pakaian->merk }}</p>
@@ -130,6 +142,57 @@
         
         <div class="d-flex justify-content-center mt-5 pt-4 border-top">
             {{ $dataPakaian->appends(request()->query())->links('pagination::bootstrap-5') }}
+        </div>
+    </div>
+
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="cartSidebar" aria-labelledby="cartSidebarLabel">
+        <div class="offcanvas-header border-bottom py-3">
+            <h5 class="offcanvas-title fw-black tracking-widest text-uppercase" id="cartSidebarLabel">Your Bag</h5>
+            <button type="button" class="btn-close shadow-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        
+        <div class="offcanvas-body d-flex flex-column p-0">
+            @php $total = 0; @endphp
+
+            @if(session('cart') && count(session('cart')) > 0)
+                <div class="flex-grow-1 overflow-auto">
+                    @foreach(session('cart') as $id => $details)
+                        @php $total += $details['harga'] * $details['quantity']; @endphp
+                        <div class="p-3 border-bottom d-flex gap-3 align-items-center">
+                            <img src="{{ asset('img/pakaian/' . $details['gambar']) }}" class="object-fit-cover" style="width: 80px; height: 100px;">
+                            
+                            <div class="flex-grow-1">
+                                <h6 class="fw-bold mb-1 text-truncate" style="font-size: 0.9rem; max-width: 150px;">{{ $details['nama_pakaian'] }}</h6>
+                                <p class="text-secondary small mb-2">Rp {{ number_format($details['harga'], 0, ',', '.') }}</p>
+                                
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span class="small fw-bolder">QTY: {{ $details['quantity'] }}</span>
+                                    
+                                    <form action="{{ url('/cart/remove') }}" method="POST" class="m-0 p-0">
+                                        @csrf
+                                        <input type="hidden" name="pakaian_id" value="{{ $id }}">
+                                        <button type="submit" class="btn btn-link text-danger p-0 shadow-none"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="text-center py-5 my-auto">
+                    <i class="bi bi-bag-x display-4 text-secondary opacity-50 mb-3 d-block"></i>
+                    <p class="text-secondary fw-bold text-uppercase">Bag is Empty</p>
+                    <button type="button" class="btn btn-outline-dark rounded-0 px-4 mt-2 fw-bold" data-bs-dismiss="offcanvas">CONTINUE SHOPPING</button>
+                </div>
+            @endif
+
+            <div class="mt-auto p-4 bg-light border-top">
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="fw-bold text-uppercase">Subtotal</span>
+                    <span class="fw-bolder fs-5">Rp {{ number_format($total, 0, ',', '.') }}</span>
+                </div>
+                <a href="{{ url('/checkout') }}" class="btn btn-dark w-100 rounded-0 py-3 fw-bold text-uppercase text-center text-decoration-none {{ (!session('cart') || count(session('cart')) == 0) ? 'disabled' : '' }}">Secure Checkout</a>
+            </div>
         </div>
     </div>
 
