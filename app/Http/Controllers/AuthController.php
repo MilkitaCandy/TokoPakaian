@@ -24,7 +24,7 @@ class AuthController extends Controller {
             // BENER: Pakai URL yang ada di routes/web.php
             return redirect()->intended('/home');
         }
-        return back()->with('error', 'Username atau password salah bro!');
+        return back()->with('error', 'Username atau password salah Sayang!');
     }
 
     // Fitur untuk melakukan register
@@ -42,6 +42,6 @@ class AuthController extends Controller {
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect('/login');
+        return redirect('/home');
     }
 }

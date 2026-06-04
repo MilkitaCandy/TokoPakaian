@@ -117,7 +117,7 @@ return [
         'mongodb' => [
     'driver' => 'mongodb',
     'dsn' => env('DB_URI', 'mongodb://127.0.0.1:27017/TokoPakaian'),
-    'database' => 'TokoPakaian',
+    'database' => env('DB_DATABASE', 'TokoPakaian'),
 ],
 
     ],

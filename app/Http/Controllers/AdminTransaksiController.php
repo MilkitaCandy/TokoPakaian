@@ -17,14 +17,36 @@ class AdminTransaksiController extends Controller
 
     // Fitur buat ngubah status pesanan
     public function updateStatus(Request $request, $id)
-    {
-        $transaksi = Transaksi::find($id);
-        if($transaksi) {
-            Transaksi::where('_id', $id)->update([
-                'status' => $request->status
-            ]);
-            return back()->with('success', 'Status pesanan ' . $transaksi->invoice . ' berhasil diubah menjadi ' . $request->status);
+{
+    $transaksi = \App\Models\Transaksi::findOrFail($id);
+
+    // 1. Logika pengembalian stok jika status diubah menjadi BATAL
+    if ($request->status == 'BATAL' && $transaksi->status != 'BATAL') {
+        foreach ($transaksi->items as $item) {
+            $baju = \App\Models\Pakaian::find($item['pakaian_id']);
+            if ($baju) {
+                // Kembalikan stok sesuai jumlah yang dibeli
+                $baju->increment('stok', $item['quantity']);
+            }
         }
-        return back()->with('error', 'Pesanan tidak ditemukan!');
     }
+
+    // 2. (Opsional) Kalau admin salah klik BATAL, lalu diubah lagi ke PENDING/DIPROSES
+    // Maka stoknya harus dikurangin lagi biar nggak dobel
+    if ($transaksi->status == 'BATAL' && $request->status != 'BATAL') {
+        foreach ($transaksi->items as $item) {
+            $baju = \App\Models\Pakaian::find($item['pakaian_id']);
+            if ($baju) {
+                // Potong stoknya lagi
+                $baju->decrement('stok', $item['quantity']);
+            }
+        }
+    }
+
+    // 3. Update status transaksinya
+    $transaksi->update(['status' => $request->status]);
+
+    return back()->with('success', 'Status transaksi berhasil diupdate dan stok sudah disesuaikan!');
+}
+
 }
