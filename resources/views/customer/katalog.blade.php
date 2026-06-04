@@ -67,11 +67,17 @@
         .btn-lift { transition: transform 0.2s ease; }
         .btn-lift:hover { transform: translateY(-2px); }
 
-        /* === PAGINATION SULTAN === */
+        /* PAGINATION SULTAN  */
         nav p.small.text-muted { display: none !important; }
         nav .justify-content-sm-between { justify-content: center !important; }
         nav .d-flex.justify-content-between.flex-fill.d-sm-none { display: none !important; }
-        .pagination { margin-bottom: 0; }
+        nav .d-none.d-sm-flex { display: flex !important; justify-content: center !important; }
+        .pagination { 
+            margin-bottom: 0; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+            row-gap: 10px; 
+        }
         .pagination .page-link { 
             color: var(--pure-black); 
             border-radius: 0 !important; 
@@ -90,10 +96,6 @@
             background-color: #f4f5f7;
             color: var(--pure-black);
         }
-
-        .offcanvas-body::-webkit-scrollbar { width: 5px; }
-        .offcanvas-body::-webkit-scrollbar-thumb { background-color: #dee2e6; }
-        .offcanvas-body::-webkit-scrollbar-thumb:hover { background-color: #adb5bd; }
     </style>
 </head>
 <body>

@@ -123,7 +123,7 @@
             <p class="text-uppercase mb-3 fw-semibold text-secondary">Season 01 / Essentials</p>
             <h1 class="display-1 fw-bolder text-uppercase mb-4 lh-1">Elevate Your<br>Everyday</h1>
             <p class="lead mb-5 fw-light mx-auto" style="max-width: 600px;">Koleksi pilihan dengan desain modern dan bahan premium. Karena penampilan terbaik dimulai dari pilihan yang tepat.</p>
-            <a href="{{ url('/katalog') }}" class="btn btn-outline-light rounded-0 btn-lg px-5 py-3 fw-bold text-uppercase btn-lift">Shop The Collection</a>
+            <a href="{{ url('/katalog') }}" class="btn btn-outline-light rounded-0 px-4 px-md-5 py-2 py-md-3 fw-bold text-uppercase btn-lift fs-6">Shop The Collection</a>
         </div>
     </header>
 
