@@ -294,16 +294,18 @@
     
     <script type="text/javascript">
     var Tawk_API = Tawk_API || {};
-    @auth
-        Tawk_API.visitor = {
-            name: '{{ auth()->user()->nama ?? auth()->user()->username }}',
-            email: '{{ auth()->user()->email ?? "user@outfit.com" }}'
-        };
-    @else
-        Tawk_API.visitor = {
-            name: 'Guest / Belum Login'
-        };
-    @endauth
+    Tawk_API.onLoad = function() {
+        @auth
+        Tawk_API.setAttributes({
+            'name': '{{ auth()->user()->nama ?? auth()->user()->username }}',
+            'email': '{{ auth()->user()->email ?? "user@outfit.com" }}'
+        }, function(error) {});
+        @else
+        Tawk_API.setAttributes({
+            'name': 'Guest / Belum Login'
+        }, function(error) {});
+        @endauth
+    };
 </script>
 <script type="text/javascript">
     var Tawk_LoadStart=new Date();
