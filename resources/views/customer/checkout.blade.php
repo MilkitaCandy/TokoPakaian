@@ -9,14 +9,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
     <style>
         :root { --pure-black: #000000; }
-        body { font-family: 'Montserrat', sans-serif; background-color: #f4f5f7; color: var(--pure-black); }
+        body { font-family: 'Montserrat', sans-serif; background-color: #f4f5f7; color: var(--pure-black); overflow-x: hidden; }
         html { scroll-behavior: smooth; }
 
         /* === TYPOGRAPHY === */
         .fw-black { font-weight: 900; }
-        .tracking-widest { letter-spacing: 0.25em; }
-        .tracking-wider { letter-spacing: 0.1em; }
+        .tracking-widest { letter-spacing: 0.15em; } /* Sedikit dikurangin biar aman di HP kecil */
+        .tracking-wider { letter-spacing: 0.08em; }
         
+        @media (min-width: 992px) {
+            .tracking-widest { letter-spacing: 0.25em; }
+            .tracking-wider { letter-spacing: 0.1em; }
+        }
+
         /* === TRUE BLACK OVERRIDE === */
         .bg-black { background-color: var(--pure-black) !important; }
         .btn-dark { background-color: var(--pure-black) !important; border-color: var(--pure-black) !important; color: #fff !important; }
@@ -26,7 +31,7 @@
         /* === PREMIUM INPUT FIELD === */
         .form-control-custom {
             border: 1px solid #ccc;
-            border-radius: 0 !important; /* Tajam bersiku */
+            border-radius: 0 !important;
             padding: 0.85rem 1rem;
             font-size: 0.9rem;
             font-weight: 500;
@@ -71,94 +76,46 @@
 <body>
 
     <!-- NAVBAR ULTRA CLEAN -->
-    <nav class="navbar navbar-dark bg-black py-4 sticky-top">
+    <nav class="navbar navbar-dark bg-black py-3 py-lg-4 sticky-top">
         <div class="container justify-content-center">
-            <a class="navbar-brand fw-black fs-3 tracking-widest m-0 text-uppercase" href="{{ url('/katalog') }}">OUT FIT.</a>
+            <a class="navbar-brand fw-black fs-4 fs-lg-3 tracking-widest m-0 text-uppercase" href="{{ url('/katalog') }}">OUT FIT.</a>
         </div>
     </nav>
 
-    <div class="container py-5 mb-5">
+    <div class="container py-4 py-lg-5 mb-5">
         <!-- BACK LINK WITH ANIMATION -->
-        <div class="mb-5">
+        <div class="mb-4 mb-lg-5">
             <a href="{{ url('/katalog') }}" class="text-dark link-elegant fw-bold small text-uppercase tracking-wider">
                 <i class="bi bi-arrow-left me-2"></i> Return to Cart
             </a>
         </div>
 
-        <div class="row g-5">
-            <!-- SISI KIRI: SHIPPING DETAILS -->
-            <div class="col-lg-7">
-                <div class="mb-4">
-                    <h4 class="fw-black text-uppercase tracking-wider m-0">Shipping Details</h4>
-                    <p class="text-secondary small fw-medium text-uppercase tracking-wider mt-1">Please fill your delivery point information</p>
-                </div>
-                
-                <form action="{{ url('/checkout/process') }}" method="POST">
-                    @csrf
-                    <div class="row g-4">
-                        <div class="col-12">
-                            <label class="small fw-bold text-uppercase tracking-wider text-secondary mb-2">Full Name</label>
-                            <input type="text" name="nama" class="form-control form-control-custom" placeholder="e.g. Fais Abimanyu" required>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <label class="small fw-bold text-uppercase tracking-wider text-secondary mb-2">Email Address</label>
-                            <input type="email" name="email" class="form-control form-control-custom" value="{{ auth()->user() ? auth()->user()->email : '' }}" placeholder="name@domain.com" required>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="small fw-bold text-uppercase tracking-wider text-secondary mb-2">Phone / WhatsApp</label>
-                            <input type="text" name="no_hp" class="form-control form-control-custom" placeholder="e.g. 08123456789" required>
-                        </div>
-
-                        <div class="col-12">
-                            <label class="small fw-bold text-uppercase tracking-wider text-secondary mb-2">Full Address</label>
-                            <textarea name="alamat" class="form-control form-control-custom" rows="3" placeholder="Street Name, Building, Unit Number, RT/RW..." required></textarea>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="small fw-bold text-uppercase tracking-wider text-secondary mb-2">City</label>
-                            <input type="text" name="kota" class="form-control form-control-custom" placeholder="e.g. Surakarta" required>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="small fw-bold text-uppercase tracking-wider text-secondary mb-2">Postal Code</label>
-                            <input type="text" name="kode_pos" class="form-control form-control-custom" placeholder="e.g. 57123" required>
-                        </div>
-
-                        <div class="col-12 mt-5">
-                            <button type="submit" class="btn btn-dark w-100 rounded-0 py-3 fw-bold text-uppercase tracking-wider fs-5 btn-lift shadow-sm">
-                                Place Order
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-
-            <!-- SISI KANAN: ORDER SUMMARY BOX -->
-            <div class="col-lg-5">
-                <div class="summary-box p-4 sticky-top shadow-sm" style="top: 110px;">
-                    <h5 class="fw-black text-uppercase tracking-wider mb-4 pb-3 border-bottom">Order Summary</h5>
+        <!-- PERUBAHAN GRID G-4 UNTUK HP, G-5 UNTUK DESKTOP -->
+        <div class="row g-4 g-lg-5">
+            
+            <!-- SISI KANAN: ORDER SUMMARY BOX (Pindah ke urutan 1 di HP, urutan 2 di Desktop) -->
+            <div class="col-lg-5 order-1 order-lg-2">
+                <!-- Ganti sticky-top jadi sticky-lg-top biar gak nyangkut di HP -->
+                <div class="summary-box p-4 p-lg-4 sticky-lg-top shadow-sm" style="top: 110px;">
+                    <h5 class="fw-black text-uppercase tracking-wider mb-4 pb-3 border-bottom fs-6 fs-lg-5">Order Summary</h5>
                     
                     @php $total = 0; @endphp
-                    <!-- UBAH BARIS INI (Tambahin , [] di dalem session-nya) -->
-@foreach(session('cart', []) as $id => $details)
-    @php $total += $details['harga'] * $details['quantity']; @endphp
-    <div class="d-flex gap-3 mb-3 pb-3 border-bottom border-light align-items-center">
-        <!-- ... sisa kodingan isi loop lu di bawahnya tetap sama ... -->
-                            <div class="position-relative">
-                                <!-- Badge Diubah Jadi Kotak Hitam Tipis -->
+                    @foreach(session('cart', []) as $id => $details)
+                        @php $total += $details['harga'] * $details['quantity']; @endphp
+                        <div class="d-flex gap-3 mb-3 pb-3 border-bottom border-light align-items-center">
+                            <div class="position-relative flex-shrink-0">
                                 <span class="position-absolute top-0 start-100 translate-middle badge badge-square border border-light">
                                     {{ $details['quantity'] }}
                                 </span>
-                                <img src="{{ asset('img/pakaian/' . $details['gambar']) }}" class="object-fit-cover border" style="width: 70px; height: 90px; aspect-ratio: 3/4;">
+                                <img src="{{ asset('img/pakaian/' . $details['gambar']) }}" class="object-fit-cover border" style="width: 60px; height: 80px; aspect-ratio: 3/4;" alt="Item">
                             </div>
-                            <div class="flex-grow-1 ps-2">
-                                <h6 class="fw-bold mb-1 text-truncate" style="font-size: 0.95rem; max-width: 180px;">{{ $details['nama_pakaian'] }}</h6>
+                            <!-- Pakai min-width: 0 biar text-truncate jalan sempurna di HP kecil -->
+                            <div class="flex-grow-1 ps-2" style="min-width: 0;">
+                                <h6 class="fw-bold mb-1 text-truncate" style="font-size: 0.9rem;">{{ $details['nama_pakaian'] }}</h6>
                                 <p class="text-secondary small m-0 fw-medium">Rp {{ number_format($details['harga'], 0, ',', '.') }}</p>
                             </div>
-                            <div class="text-end">
-                                <p class="fw-bold m-0" style="font-size: 0.95rem;">Rp {{ number_format($details['harga'] * $details['quantity'], 0, ',', '.') }}</p>
+                            <div class="text-end flex-shrink-0">
+                                <p class="fw-bold m-0" style="font-size: 0.9rem;">Rp {{ number_format($details['harga'] * $details['quantity'], 0, ',', '.') }}</p>
                             </div>
                         </div>
                     @endforeach
@@ -170,15 +127,64 @@
                     </div>
                     <div class="d-flex justify-content-between mb-3 pb-3 border-bottom text-secondary fw-medium">
                         <span class="small fw-bold text-uppercase tracking-wider">Shipping</span>
-                        <span class="small text-uppercase tracking-wide" style="font-size: 0.75rem;">Calculated at next step</span>
+                        <span class="small text-uppercase tracking-wide" style="font-size: 0.75rem;">At next step</span>
                     </div>
                     
                     <!-- TOTAL AREA -->
                     <div class="d-flex justify-content-between align-items-center pt-2">
                         <span class="fw-black text-uppercase tracking-widest fs-5">Total</span>
-                        <span class="fw-black fs-4 tracking-wider">Rp {{ number_format($total, 0, ',', '.') }}</span>
+                        <span class="fw-black fs-5 fs-lg-4 tracking-wider">Rp {{ number_format($total, 0, ',', '.') }}</span>
                     </div>
                 </div>
+            </div>
+
+            <!-- SISI KIRI: SHIPPING DETAILS (Pindah ke urutan 2 di HP, urutan 1 di Desktop) -->
+            <div class="col-lg-7 order-2 order-lg-1 mt-5 mt-lg-0">
+                <div class="mb-4">
+                    <h4 class="fw-black text-uppercase tracking-wider m-0 fs-5 fs-lg-4">Shipping Details</h4>
+                    <p class="text-secondary small fw-medium text-uppercase tracking-wider mt-1" style="font-size: 0.75rem;">Please fill your delivery point information</p>
+                </div>
+                
+                <form action="{{ url('/checkout/process') }}" method="POST">
+                    @csrf
+                    <div class="row g-3 g-lg-4">
+                        <div class="col-12">
+                            <label class="small fw-bold text-uppercase tracking-wider text-secondary mb-2" style="font-size: 0.75rem;">Full Name</label>
+                            <input type="text" name="nama" class="form-control form-control-custom" placeholder="e.g. Fais Abimanyu" required>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="small fw-bold text-uppercase tracking-wider text-secondary mb-2" style="font-size: 0.75rem;">Email Address</label>
+                            <input type="email" name="email" class="form-control form-control-custom" value="{{ auth()->user() ? auth()->user()->email : '' }}" placeholder="name@domain.com" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="small fw-bold text-uppercase tracking-wider text-secondary mb-2" style="font-size: 0.75rem;">Phone / WhatsApp</label>
+                            <input type="text" name="no_hp" class="form-control form-control-custom" placeholder="e.g. 08123456789" required>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="small fw-bold text-uppercase tracking-wider text-secondary mb-2" style="font-size: 0.75rem;">Full Address</label>
+                            <textarea name="alamat" class="form-control form-control-custom" rows="3" placeholder="Street Name, Building, Unit Number, RT/RW..." required></textarea>
+                        </div>
+
+                        <div class="col-md-6 col-6">
+                            <label class="small fw-bold text-uppercase tracking-wider text-secondary mb-2" style="font-size: 0.75rem;">City</label>
+                            <input type="text" name="kota" class="form-control form-control-custom" placeholder="e.g. Surakarta" required>
+                        </div>
+
+                        <div class="col-md-6 col-6">
+                            <label class="small fw-bold text-uppercase tracking-wider text-secondary mb-2" style="font-size: 0.75rem;">Postal Code</label>
+                            <input type="text" name="kode_pos" class="form-control form-control-custom" placeholder="e.g. 57123" required>
+                        </div>
+
+                        <div class="col-12 mt-4 mt-lg-5">
+                            <button type="submit" class="btn btn-dark w-100 rounded-0 py-3 fw-bold text-uppercase tracking-wider fs-6 fs-lg-5 btn-lift shadow-sm">
+                                Place Order
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
 
         </div>
