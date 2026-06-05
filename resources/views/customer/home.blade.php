@@ -293,7 +293,20 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script type="text/javascript">
-    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+    var Tawk_API = Tawk_API || {};
+    @auth
+        Tawk_API.visitor = {
+            name: '{{ auth()->user()->nama ?? auth()->user()->username }}',
+            email: '{{ auth()->user()->email ?? "user@outfit.com" }}'
+        };
+    @else
+        Tawk_API.visitor = {
+            name: 'Guest / Belum Login'
+        };
+    @endauth
+</script>
+<script type="text/javascript">
+    var Tawk_LoadStart=new Date();
     (function(){
     var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
     s1.async=true;
@@ -302,6 +315,6 @@
     s1.setAttribute('crossorigin','*');
     s0.parentNode.insertBefore(s1,s0);
     })();
-    </script>
+</script>
 </body>
 </html>
