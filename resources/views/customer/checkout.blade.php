@@ -150,7 +150,7 @@
                     <div class="row g-3 g-lg-4">
                         <div class="col-12">
                             <label class="small fw-bold text-uppercase tracking-wider text-secondary mb-2" style="font-size: 0.75rem;">Full Name</label>
-                            <input type="text" name="nama" class="form-control form-control-custom" placeholder="e.g. Fais Abimanyu" required>
+                            <input type="text" name="nama" class="form-control form-control-custom" placeholder="e.g. Asmanipun Panjenegan" required>
                         </div>
                         
                         <div class="col-md-6">
