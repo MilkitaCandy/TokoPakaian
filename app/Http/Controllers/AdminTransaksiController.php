@@ -20,6 +20,11 @@ class AdminTransaksiController extends Controller
 {
     $transaksi = \App\Models\Transaksi::findOrFail($id);
 
+    // Cegah update jika status saat ini sudah final (SELESAI / BATAL)
+    if (in_array($transaksi->status, ['SELESAI', 'BATAL'])) {
+        return back()->with('error', 'Status pesanan yang sudah final tidak dapat diubah lagi!');
+    }
+
     // 1. Logika pengembalian stok jika status diubah menjadi BATAL
     if ($request->status == 'BATAL' && $transaksi->status != 'BATAL') {
         foreach ($transaksi->items as $item) {
@@ -32,7 +37,7 @@ class AdminTransaksiController extends Controller
     }
 
     // 2. (Opsional) Kalau admin salah klik BATAL, lalu diubah lagi ke PENDING/DIPROSES
-    // Maka stoknya harus dikurangin lagi biar nggak dobel
+    // Maka stoknya harus dikurangin lagi
     if ($transaksi->status == 'BATAL' && $request->status != 'BATAL') {
         foreach ($transaksi->items as $item) {
             $baju = \App\Models\Pakaian::find($item['pakaian_id']);

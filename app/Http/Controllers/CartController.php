@@ -15,21 +15,21 @@ class CartController extends Controller
     {
         $pakaian = Pakaian::find($request->pakaian_id);
         if(!$pakaian) {
-            return back()->with('error', 'Barang ghaib!');
+            return back()->with('error', 'Barang tidak ditemukan!');
         }
         
         // Cek stok, jika stok 0 dilarang masuk keranjang
         if($pakaian->stok <= 0) {
-            return back()->with('error', 'Yah, stok ' . $pakaian->nama_pakaian . ' lagi kosong bro!');
+            return back()->with('error', 'Mohon maaf, stok ' . $pakaian->nama_pakaian . ' sedang kosong.');
         }
         $cart = session()->get('cart', []);
 
-        // jika barang ada di keranjang, menambahkan jumlahnya
+        // Jika barang sudah ada di keranjang, tambahkan jumlahnya
         if(isset($cart[$request->pakaian_id])) {
             
-            // Cek apakah jika ditambahin ke keranjang bakal melebihi sisa stok di DB?
+            // Periksa apakah penambahan ke keranjang melebihi sisa stok di database
             if($cart[$request->pakaian_id]['quantity'] >= $pakaian->stok) {
-                return back()->with('error', 'Lu gak bisa beli lebih dari sisa stok bro! Sisa cuma ' . $pakaian->stok);
+                return back()->with('error', 'Anda tidak dapat membeli melebihi sisa stok yang tersedia. Sisa stok: ' . $pakaian->stok);
             }
             $cart[$request->pakaian_id]['quantity']++;
         } else {
@@ -41,10 +41,10 @@ class CartController extends Controller
             ];
         }
         session()->put('cart', $cart);   
-        return back()->with('success', 'Berhasil masuk keranjang!');
+        return back()->with('success', 'Barang berhasil ditambahkan ke keranjang!');
     }
 
-    // Fungsi untuk membuang barang dari keranjang
+    // Fungsi untuk menghapus barang dari keranjang
     public function remove(Request $request)
     {
         if($request->pakaian_id) {
@@ -60,9 +60,9 @@ class CartController extends Controller
     // Fungsi untuk menampilkan halaman checkout
     public function checkout()
     {
-        // Kalau keranjang kosong tapi user iseng maksa masuk URL /checkout, tendang balik ke katalog
+        // Jika keranjang kosong namun pengguna mengakses URL /checkout, arahkan kembali ke katalog
         if(!session('cart') || count(session('cart')) == 0) {
-            return redirect('/katalog')->with('error', 'Keranjang masih kosong!');
+            return redirect('/katalog')->with('error', 'Keranjang Anda masih kosong!');
         }
 
         return view('customer.checkout');
@@ -80,7 +80,7 @@ class CartController extends Controller
         foreach($cart as $id => $details) {
             $baju = Pakaian::find($id);
             if(!$baju || $baju->stok < $details['quantity']) {
-                return redirect('/katalog')->with('error', 'Sorry bro, stok ' . $details['nama_pakaian'] . ' udah keduluan abis/gak cukup. Cek keranjang lu lagi ya!');
+                return redirect('/katalog')->with('error', 'Mohon maaf, stok ' . $details['nama_pakaian'] . ' sudah habis atau tidak mencukupi. Silakan periksa kembali keranjang Anda.');
             }
         }
         
@@ -97,15 +97,15 @@ class CartController extends Controller
                 'gambar' => $details['gambar'] ?? 'default.jpg'
             ];
 
-            // potong stok
+            // Kurangi stok pakaian
             $baju = Pakaian::find($id);
             $baju->decrement('stok', $details['quantity']);
         }
         
-        // Bikin Invoice unik
+        // Buat nomor Invoice unik
         $invoice = 'INV-' . date('Ymd') . '-' . strtoupper(Str::random(5));
 
-        // Simpan transaksi ke MongoDB
+        // Simpan transaksi ke database
         $transaksi = Transaksi::create([
             'invoice' => $invoice,
             'username' => auth()->user()->username, 
@@ -120,9 +120,7 @@ class CartController extends Controller
             'status' => 'PENDING', 
         ]);
 
-        // ==========================================
         // LOGIKA MIDTRANS SNAP (Generate Token)
-        // ==========================================
         Config::$serverKey = env('MIDTRANS_SERVER_KEY');
         Config::$isProduction = env('MIDTRANS_IS_PRODUCTION', false);
         Config::$isSanitized = true;
@@ -131,12 +129,12 @@ class CartController extends Controller
         Config::$curlOptions = [
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_SSL_VERIFYHOST => false,
-            CURLOPT_HTTPHEADER => [] // <-- Ini bumbu rahasia penangkal error 10023
+            CURLOPT_HTTPHEADER => [] // <-- Penanganan untuk mencegah error 10023
         ];
 
         $params = [
             'transaction_details' => [
-                'order_id' => $invoice, // Sinkron sama invoice database
+                'order_id' => $invoice, // Sinkronisasi dengan invoice database
                 'gross_amount' => $total,
             ],
             'customer_details' => [
@@ -148,10 +146,10 @@ class CartController extends Controller
 
         $snapToken = Snap::getSnapToken($params);
 
-        // Kosongin keranjang
+        // Kosongkan keranjang setelah checkout
         session()->forget('cart');
 
-        // Lempar ke halaman bayar dengan bawa tokennya
+        // Arahkan ke halaman pembayaran beserta token
         return view('customer.bayar', compact('snapToken', 'transaksi'));
     }
 
@@ -159,7 +157,7 @@ class CartController extends Controller
     public function riwayat()
     {
         if(!auth()->check()) {
-            return redirect('/login')->with('error', 'Login dulu bro!');
+            return redirect('/login')->with('error', 'Silakan login terlebih dahulu!');
         }
         $riwayat = Transaksi::where('username', auth()->user()->username)
                           ->orderBy('created_at', 'desc')
@@ -167,38 +165,38 @@ class CartController extends Controller
         return view('customer.riwayat', compact('riwayat'));
     }
 
-    // Fungsi untuk pembayaran jika belum selesai
+    // Fungsi untuk melanjutkan pembayaran jika belum selesai
     public function bayarLagi($invoice)
     {
-        // Cari transaksi tanpa ngefilter status PENDING dulu
+        // Cari transaksi tanpa memfilter status PENDING terlebih dahulu
         $transaksi = Transaksi::where('invoice', $invoice)
                               ->where('username', auth()->user()->username)
                               ->first();
 
-        // Kalau transaksinya beneran gaada (user iseng ngasal ketik URL)
+        // Jika transaksi tidak ditemukan
         if (!$transaksi) {
-            return redirect('/riwayat')->with('error', 'Transaksi tidak ditemukan bro.');
+            return redirect('/riwayat')->with('error', 'Transaksi tidak ditemukan.');
         }
 
-        // Kalau iseng pencet bayar padahal status udah LUNAS / DIPROSES
+        // Jika pengguna mencoba membayar pesanan yang sudah berstatus LUNAS / DIPROSES
         if (in_array($transaksi->status, ['DIPROSES', 'DIKIRIM', 'SELESAI'])) {
-            return redirect('/riwayat')->with('success', 'Santai bro, pesanan lu yang ini udah lunas dibayar kok!');
+            return redirect('/riwayat')->with('success', 'Pesanan Anda ini sudah lunas dibayar.');
         }
 
-        // Kalau statusnya udah BATAL
+        // Jika statusnya sudah BATAL
         if ($transaksi->status == 'BATAL') {
-            return redirect('/riwayat')->with('error', 'Orderan lu udah dibatalin, gak bisa dibayar lagi bro.');
+            return redirect('/riwayat')->with('error', 'Pesanan sudah dibatalkan dan tidak dapat dibayar lagi.');
         }
 
-        // Nah, kalau statusnya emang masih PENDING, baru kita siapin tokennya
+        // Jika statusnya masih PENDING, siapkan token
         $snapToken = $transaksi->snap_token;
 
-        // Jaga-jaga kalau transaksi lama belum ada snap_token-nya
+        // Antisipasi jika transaksi lama belum memiliki snap_token
         if (!$snapToken) {
-            return redirect('/riwayat')->with('error', 'kamu Udah bayar tunggu di proses ya!');
+            return redirect('/riwayat')->with('error', 'Anda sudah membayar, mohon tunggu pesanan diproses.');
         }
 
-        // Arahin langsung ke halaman hitam (bayar.blade.php)
+        // Arahkan langsung ke halaman pembayaran (bayar.blade.php)
         return view('customer.bayar', compact('snapToken', 'transaksi'));
     }
 }
