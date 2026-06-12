@@ -15,7 +15,7 @@ class AdminTransaksiController extends Controller
         return view('admin.transaksi', compact('transaksi'));
     }
 
-    // Fitur buat ngubah status pesanan
+    // Fitur untuk mengubah status pesanan
     public function updateStatus(Request $request, $id)
 {
     $transaksi = \App\Models\Transaksi::findOrFail($id);

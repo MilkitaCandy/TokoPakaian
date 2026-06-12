@@ -109,8 +109,24 @@
                 <a href="{{ url('/home') }}" class="text-white text-decoration-none fw-bold small text-uppercase tracking-wider opacity-75 transition text-opacity-100-hover">
                     <i class="bi bi-arrow-left me-1"></i> Home
                 </a>
-                <a href="#cartSidebar" data-bs-toggle="offcanvas" class="text-white text-decoration-none fs-5 opacity-75 transition text-opacity-100-hover">
-                    <i class="bi bi-bag"></i>
+                
+                <!-- TOMBOL KERANJANG SULTAN (DENGAN BADGE MERAH) -->
+                <a href="#cartSidebar" data-bs-toggle="offcanvas" class="text-white text-decoration-none d-flex align-items-center fw-bold small text-uppercase tracking-widest opacity-75 transition text-opacity-100-hover">
+                    
+                    <!-- Wadah Relative buat numpangin si Badge -->
+                    <div class="position-relative me-2 mt-1">
+                        <i class="bi bi-bag fs-5"></i>
+                        
+                        @php
+                            // Logika ngitung jumlah barang
+                            $cartCount = session('cart') ? array_sum(array_column(session('cart'), 'quantity')) : 0;
+                        @endphp
+                        
+                        @if($cartCount > 0)
+                            <!-- Badge Merah Bulat (Presisi Tengah) -->
+                            <span class="position-absolute top-0 start-100 translate-middle rounded-circle bg-danger border border-dark text-white d-flex align-items-center justify-content-center" style="font-size: 0.65rem; width: 18px; height: 18px; transform: translate(-30%, -20%) !important; line-height: 1; padding-top: 1px; font-weight: 700;">{{ $cartCount }}</span>
+                        @endif
+                    </div>
                 </a>
             </div>
         </div>
@@ -120,7 +136,7 @@
     <div class="bg-white text-dark py-5 border-bottom border-secondary border-opacity-25">
         <div class="container text-center py-4">
             <p class="text-secondary fw-bold text-uppercase tracking-widest small mb-2">Explore The Full Collection</p>
-            <h2 class="display-4 fw-black text-uppercase tracking-widest m-0">The Archive</h2>
+            <h2 class="display-4 fw-black text-uppercase tracking-widest m-0">The Collection</h2>
         </div>
     </div>
 
